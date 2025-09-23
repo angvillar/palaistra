@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<ul class="list-group list-group-flush">
+    {% for deck in object_list %}
+        <li class="list-group-item">
+           <a href="{% url 'problems:deck-detail' deck.id %}">{{ deck.name }}</a>
+        </li>
+    {% empty %}
+        <li>No decks yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

@@ -1,0 +1,4 @@
+{% load problem_tags %}
+
+<p>{{ object.body|render_problem_links|safe }}</p>
+<p>Attempts: {{ object.attempts.count }}</p>

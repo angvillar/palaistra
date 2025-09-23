@@ -1,0 +1,39 @@
+{% include 'problems/includes/problem_display.html' %}
+
+<hr>
+
+<h4>Hints</h4>
+<div class="d-grid gap-2 mb-3">
+    {% for hint in object.hints.all %}
+        <div class="mb-2">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#hint-{{ forloop.counter }}" aria-expanded="false" aria-controls="hint-{{ forloop.counter }}">
+                Show Hint {{ forloop.counter }}
+            </button>
+            <div class="collapse mt-2" id="hint-{{ forloop.counter }}">
+                <div class="card card-body">
+                    {{ hint.body|safe }}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-muted">No hints for this problem.</p>
+    {% endfor %}
+</div>
+
+<h4>Solutions</h4>
+<div class="d-grid gap-2 mb-3">
+    {% for solution in object.solutions.all %}
+        <div class="mb-2">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#solution-{{ forloop.counter }}" aria-expanded="false" aria-controls="solution-{{ forloop.counter }}">
+                Show Solution {{ forloop.counter }}
+            </button>
+            <div class="collapse mt-2" id="solution-{{ forloop.counter }}">
+                <div class="card card-body">
+                    {{ solution.body|safe }}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-muted">No solutions for this problem.</p>
+    {% endfor %}
+</div>
