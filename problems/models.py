@@ -1,8 +1,7 @@
 # Django imports
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Third-party imports
 from taggit.managers import TaggableManager
@@ -15,12 +14,16 @@ class TaggedProblem(TaggedItemBase):
 class Problem(models.Model):
     body = models.TextField()
     pub_date = models.DateTimeField("date published", default=timezone.now)
-
-    # Generic relation to a source
-    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
-    source_object_id = models.PositiveIntegerField(null=True, blank=True)
-    source = GenericForeignKey('source_content_type', 'source_object_id')
     tags = TaggableManager(through=TaggedProblem)
+
+    # Book Source Information
+    book_source = models.ForeignKey(
+        'BookSource',
+        on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
+    page_number = models.PositiveIntegerField(null=True, blank=True)
+    problem_number = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "problem"
@@ -29,38 +32,18 @@ class Problem(models.Model):
 
     def __str__(self):
         return (self.body[:75] + '...') if len(self.body) > 75 else self.body
+    
 
-class Source(models.Model):
-    """Abstract base model for all sources."""
-    class Meta:
-        # This ensures that Source doesn't get its own table and avoids the 'id' clash.
-        abstract = True
-
-    def __str__(self):
-        raise NotImplementedError("Subclasses must implement __str__")
-
-class BookSource(Source):
+class BookSource(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"Book: {self.title} by {self.author}"
-    
+        return f"{self.title} by {self.author}"
+
     class Meta:
         unique_together = ('title', 'author')
-
-class PersonSource(Source):
-    name = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.name
-
-class YouTubeVideoSource(Source):
-    title = models.CharField(max_length=255)
-    url = models.URLField(unique=True)
-    def __str__(self):
-        return self.title
-
+        ordering = ['title']
 
 class Solution(models.Model):
     body = models.TextField()

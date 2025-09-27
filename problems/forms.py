@@ -7,13 +7,10 @@ from taggit.models import Tag
 
 # Local application imports
 from .models import (
-    BookSource,
     DeckTagFilter,
-    PersonSource,
     Problem,
     Solution,
     TaggedProblem,
-    YouTubeVideoSource,
 )
 class SolutionForm(forms.ModelForm):
     class Meta:
@@ -24,48 +21,15 @@ class SolutionForm(forms.ModelForm):
         }
 
 class ProblemAdminForm(forms.ModelForm):
-    # Define choices for the source type dropdown
-    SOURCE_TYPE_CHOICES = (
-        ('', '---------'),
-        ('book', 'Book'),
-        ('person', 'Person'),
-        ('youtube', 'YouTube Video'),
-    )
-    source_type = forms.ChoiceField(choices=SOURCE_TYPE_CHOICES, required=False, label="Source Type")
-
-    # --- Fields for BookSource ---
-    book_source = forms.ModelChoiceField(
-        queryset=BookSource.objects.all(), required=False, label="Book"
-    )
-
-    # --- Fields for PersonSource ---
-    person_source = forms.ModelChoiceField(
-        queryset=PersonSource.objects.all(), required=False, label="Person"
-    )
-
-    # --- Fields for YouTubeVideoSource ---
-    youtube_source = forms.ModelChoiceField(
-        queryset=YouTubeVideoSource.objects.all(), required=False, label="YouTube Video"
-    )
-
-
     class Meta:
         model = Problem
-        fields = ('body', 'pub_date')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk and self.instance.source:
-            source = self.instance.source
-            if isinstance(source, BookSource):
-                self.initial['source_type'] = 'book'
-                self.initial['book_source'] = source
-            elif isinstance(source, PersonSource):
-                self.initial['source_type'] = 'person'
-                self.initial['person_source'] = source
-            elif isinstance(source, YouTubeVideoSource):
-                self.initial['source_type'] = 'youtube'
-                self.initial['youtube_source'] = source
+        fields = (
+            'body', 
+            'pub_date',
+            'book_source',
+            'page_number',
+            'problem_number',
+        )
 
 class DeckTagFilterForm(forms.ModelForm):
     class Meta:

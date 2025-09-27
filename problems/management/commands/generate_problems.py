@@ -1,6 +1,6 @@
 import random
 from django.core.management.base import BaseCommand
-from problems.models import Problem, Solution, Hint, Deck, DeckTagFilter, BookSource, PersonSource, YouTubeVideoSource
+from problems.models import Problem, Solution, Hint, Deck, DeckTagFilter, BookSource
 from taggit.models import Tag
 
 class Command(BaseCommand):
@@ -11,8 +11,6 @@ class Command(BaseCommand):
         self.stdout.write('Cleaning old data...')
         Problem.objects.all().delete()
         BookSource.objects.all().delete()
-        PersonSource.objects.all().delete()
-        YouTubeVideoSource.objects.all().delete()
         Solution.objects.all().delete()
         Hint.objects.all().delete()
         Deck.objects.all().delete()
@@ -41,30 +39,15 @@ class Command(BaseCommand):
             r"Calculate the limit: \(\lim_{x \to 0} \frac{\sin(x)}{x}\). This fundamental limit in calculus is equal to 1.",
             r"The Fourier Transform of a function \(f(t)\) is given by \[\hat{f}(\omega) = \int_{-\infty}^{\infty} f(t) e^{-i\omega t} dt\]"
         ]
-        # Pre-generate unique sources to avoid IntegrityError
+        
+        # Pre-generate some book sources
         book_sources = [
-            BookSource.objects.get_or_create(title=f"Advanced {subject} Textbook", author=f"Dr. {author}")[0]
-            for subject in subjects
-            for author in ['Abel', 'Bernoulli', 'Cantor']
+            BookSource.objects.create(title="Calculus: Early Transcendentals", author="James Stewart"),
+            BookSource.objects.create(title="Linear Algebra and Its Applications", author="David C. Lay"),
+            BookSource.objects.create(title="Principles of Mathematical Analysis", author="Walter Rudin"),
         ]
-        self.stdout.write(f'  - Created or found {len(book_sources)} unique book sources.')
-
-        person_sources = [
-            PersonSource.objects.get_or_create(name=f"Professor {name}")[0]
-            for name in ['Euler', 'Gauss', 'Riemann', 'Hilbert', 'Poincaré']
-        ]
-        self.stdout.write(f'  - Created or found {len(person_sources)} unique person sources.')
-
-        youtube_sources = [
-            YouTubeVideoSource.objects.get_or_create(
-                title=f"Understanding {subject} Proofs",
-                url=f"https://www.youtube.com/watch?v=example_{i}"
-            )[0]
-            for i, subject in enumerate(subjects * 2) # Create a few unique video sources
-        ]
-        self.stdout.write(f'  - Created or found {len(youtube_sources)} unique YouTube video sources.')
-
-        all_sources = list(book_sources) + list(person_sources) + list(youtube_sources)
+        self.stdout.write(f'  - Created {len(book_sources)} book sources.')
+        
         # 2. Create Problems
         num_problems = 50
         for i in range(num_problems):
@@ -72,16 +55,20 @@ class Command(BaseCommand):
             difficulty = random.choice(difficulties)
             problem_type = random.choice(problem_types)
             
+            # Randomly assign a book source and details
+            problem_data = {
+                'body': f"This is the body for a {difficulty} {subject} {problem_type} problem.\n\n{random.choice(latex_expressions)}"
+            }
+            if random.random() > 0.3: # 70% chance to have a book source
+                problem_data['book_source'] = random.choice(book_sources)
+                problem_data['page_number'] = random.randint(20, 500)
+                problem_data['problem_number'] = f"{random.randint(1, 15)}-{random.randint(1, 10)}"
+
             problem = Problem.objects.create(
-                body=f"This is the body for a {difficulty} {subject} {problem_type} problem.\n\n{random.choice(latex_expressions)}"
+                **problem_data
             )
             problem.tags.add(subject, difficulty, problem_type)
 
-            # Randomly assign a pre-existing source, or no source
-            if random.random() > 0.2: # 80% chance to have a source
-                problem.source = random.choice(all_sources)
-                problem.save()
-                
             # Create 1 to 3 hints for each problem
             for j in range(random.randint(1, 3)):
                 Hint.objects.create(problem=problem, body=f"This is hint #{j+1} for problem #{problem.pk}.")

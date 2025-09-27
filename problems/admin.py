@@ -17,11 +17,9 @@ from .models import (
     Deck,
     DeckTagFilter,
     Hint,
-    PersonSource,
     Problem,
     Solution,
     TaggedProblem,
-    YouTubeVideoSource,
 )
 
 class SolutionInline(admin.TabularInline):
@@ -54,58 +52,28 @@ class ProblemAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'get_tags', 'pub_date')
     list_filter = ('tags',)
     search_fields = ('body',)
+    readonly_fields = ('get_problem_link_helper',)
+    fieldsets = (
+        (None, {
+            'fields': ('body', 'get_problem_link_helper', 'pub_date')
+        }),
+        ('Book Source Information', {
+            'classes': ('collapse',),
+            'fields': ('book_source', 'page_number', 'problem_number')
+        })
+    )
 
     class Media:
         js = (
             'admin/js/problem_admin.js', # Your existing JS
-            'admin/js/problem_source_admin.js', # Corrected path
             'admin/js/related_popup.js'
         )
-
-    # Define fieldsets to correctly group the fields for the JS to work
-    fieldsets = (
-        (None, {
-            'fields': (
-                'body',
-                'get_problem_link_helper', # Our new helper field
-                'pub_date'
-            )
-        }),
-        ('SOURCE INFORMATION', {
-            'classes': ('collapse',),
-            'fields': (
-                'source_type',
-                'book_source', # Book field
-                'person_source', # Person field
-                # YouTubeVideoSource is not selectable, so it's removed
-            ),
-        }),
-    )
-
-    readonly_fields = ('get_problem_link_helper',)
 
     def get_form(self, request, obj=None, **kwargs):
         # Pass the admin_site to the form to enable the '+' button
         form = super().get_form(request, obj, **kwargs)
         form.admin_site = self.admin_site
         return form
-
-    def save_model(self, request, obj, form, change):
-        source_type = form.cleaned_data.get('source_type')
-        new_source = None
-
-        if source_type == 'book':
-            new_source = form.cleaned_data.get('book_source')
-        elif source_type == 'person':
-            new_source = form.cleaned_data.get('person_source')
-        # No 'youtube' case as it's not selectable
-
-        # If the source is changing or being cleared, we just update the reference.
-        # We no longer delete the old source from here, as it might be used by other problems.
-        obj.source = new_source
-
-        # Save the Problem instance first to get an ID
-        super().save_model(request, obj, form, change)
 
     def get_tags(self, obj):
         return ", ".join(t.name for t in obj.tags.all())
@@ -155,5 +123,3 @@ class DeckAdmin(admin.ModelAdmin):
 admin.site.register(Deck, DeckAdmin)
 admin.site.register(Problem, ProblemAdmin)
 admin.site.register(BookSource)
-admin.site.register(YouTubeVideoSource)
-admin.site.register(PersonSource)

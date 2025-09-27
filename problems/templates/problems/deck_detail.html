@@ -8,10 +8,10 @@
             <p class="mb-0">
                 <strong>Tags:</strong>
                 {% for tag in object.get_include_tags %}
-                    <span class="badge bg-success">{{ tag.name }}</span>
+                    <span class="badge bg-light text-dark">{{ tag.name }}</span>
                 {% endfor %}
                 {% for tag in object.get_exclude_tags %}
-                    <span class="badge bg-danger">{{ tag.name }}</span>
+                    <span class="badge bg-secondary">{{ tag.name }}</span>
                 {% endfor %}
                 {% if not object.get_include_tags and not object.get_exclude_tags %}
                     <span class="badge bg-secondary">(Any)</span>
