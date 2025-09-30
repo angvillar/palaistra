@@ -127,3 +127,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# The URL that will serve the media files.
+MEDIA_URL = '/tiptap_uploads/'
+
+# The absolute path to the directory where media files are stored.
+# Make sure this directory exists and is writable by your Django application.
+MEDIA_ROOT = BASE_DIR / 'tiptap_uploads'

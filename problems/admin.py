@@ -74,10 +74,14 @@ class ProblemAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         # 1. Generate the URL on the server
         popup_url = reverse('admin:problems_problem_changelist') + '?_to_field=id&_popup=1'
+        image_upload_url = reverse('problems:tiptap-image-upload') # For image uploads
 
         # 2. Pass it to the widget's attributes
         kwargs['widgets'] = {
-            'body': TiptapWidget(attrs={'data_popup_url': popup_url})
+            'body': TiptapWidget(attrs={
+                'data_popup_url': popup_url,
+                'data_image_upload_url': image_upload_url,
+            })
         }
         return super().get_form(request, obj, **kwargs)
 

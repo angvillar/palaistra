@@ -95,3 +95,34 @@ def deck_practice(request, deck_id):
         'attempts_count': attempts_count,
     }
     return render(request, 'problems/deck_practice.html', context)
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.files.storage import default_storage
+from django.http import JsonResponse
+
+@staff_member_required
+def tiptap_image_upload(request):
+    """
+    Handles image uploads from the Tiptap editor.
+    """
+    print("\n--- Tiptap Image Upload View ---")
+    print(f"Request method: {request.method}")
+    if request.method == 'POST' and request.FILES.get('image'):
+        print("Request is POST and contains an image file.")
+        image = request.FILES['image']
+        print(f"Image received: {image.name} ({image.size} bytes)")
+        # Define a path to save the image, e.g., 'tiptap_uploads/...'
+        file_name = default_storage.save(f"tiptap_uploads/{image.name}", image)
+        print(f"Image saved as: {file_name}")
+        # Get the URL for the saved file
+        file_url = default_storage.url(file_name)
+        print(f"Returning success JSON with URL: {file_url}")
+
+        
+        return JsonResponse({'url': file_url})
+    print("Request failed validation (not POST or no image file).")
+    return JsonResponse(
+        {'error': 'Invalid request or no image file provided.'}, 
+        status=400
+    )
+
