@@ -1,0 +1,11 @@
+{% comment %}
+This template renders the Tiptap editor structure.
+The original textarea is included but hidden with `style="display: none;"`.
+Our JavaScript will use this hidden textarea to get the initial content and to save changes.
+{% endcomment %}
+<div class="tiptap-container" data-popup-url="{{ widget.attrs.data_popup_url }}">
+    <div class="tiptap-toolbar"></div>
+    <div class="tiptap-editor"></div>
+    {# Render the original widget (textarea) but hide it #}
+    <textarea name="{{ widget.name }}" style="display: none;" {% include "django/forms/widgets/attrs.html" %}>{{ widget.value|default_if_none:"" }}</textarea>
+</div>

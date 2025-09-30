@@ -1,5 +1,6 @@
 # Django imports
 from django.contrib import admin
+from django.forms import Textarea
 from django.urls import reverse
 
 # Local application imports
@@ -22,6 +23,33 @@ from .models import (
     TaggedProblem,
 )
 
+from django.utils.html import format_html
+from django.templatetags.static import static
+
+class TiptapWidget(Textarea):
+    """
+    A custom widget to render a Tiptap editor.
+    """
+    template_name = 'admin/widgets/tiptap_editor.html'
+
+    class Media:
+        # Tiptap and its extensions from a CDN
+        js = [
+            format_html(
+                '<script type="module" src="{}"></script>', 
+                static('admin/js/tiptap_editor.js'),
+            ),
+            format_html(
+                '<script type="module" src="{}"></script>',
+                static('admin/js/related_popup.js')
+            ), 
+            'admin/js/problem_admin.js',
+        ]
+ 
+        css = {
+            'all': ('admin/css/tiptap_editor.css',)
+        }
+
 class SolutionInline(admin.TabularInline):
     form = SolutionForm
     model = Solution
@@ -43,6 +71,16 @@ class TaggedProblemInline(admin.TabularInline):
     classes = ('collapse',)
 
 class ProblemAdmin(admin.ModelAdmin):
+    def get_form(self, request, obj=None, **kwargs):
+        # 1. Generate the URL on the server
+        popup_url = reverse('admin:problems_problem_changelist') + '?_to_field=id&_popup=1'
+
+        # 2. Pass it to the widget's attributes
+        kwargs['widgets'] = {
+            'body': TiptapWidget(attrs={'data_popup_url': popup_url})
+        }
+        return super().get_form(request, obj, **kwargs)
+
     form = ProblemAdminForm
     inlines = (
         TaggedProblemInline,
@@ -52,10 +90,9 @@ class ProblemAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'get_tags', 'pub_date')
     list_filter = ('tags',)
     search_fields = ('body',)
-    readonly_fields = ('get_problem_link_helper',)
     fieldsets = (
         (None, {
-            'fields': ('body', 'get_problem_link_helper', 'pub_date')
+            'fields': ('body', 'pub_date')
         }),
         ('Book Source Information', {
             'classes': ('collapse',),
@@ -63,33 +100,9 @@ class ProblemAdmin(admin.ModelAdmin):
         })
     )
 
-    class Media:
-        js = (
-            'admin/js/problem_admin.js', # Your existing JS
-            'admin/js/related_popup.js'
-        )
-
-    def get_form(self, request, obj=None, **kwargs):
-        # Pass the admin_site to the form to enable the '+' button
-        form = super().get_form(request, obj, **kwargs)
-        form.admin_site = self.admin_site
-        return form
-
     def get_tags(self, obj):
         return ", ".join(t.name for t in obj.tags.all())
     get_tags.short_description = 'Tags'
-
-    def get_problem_link_helper(self, obj):
-        from django.utils.html import format_html
-        return format_html(
-            # The `id` must be on the `<a>` tag itself for Django's JS to name the popup window correctly.
-            # The `data-id` attribute tells our custom JS which textarea to target.
-            '<a href="{}" id="lookup_id_body" class="related-widget-wrapper-link" data-popup="yes" data-id="id_body" title="Select a problem to link">Select a problem to link</a>',
-            #'<a href="{}" id="lookup_id_body" class="related-widget-wrapper-link" data-popup="yes" data-id="id_body" title="Select a problem to link"  onclick="return showRelatedObjectLookupPopup(this);">Select a problem to link</a>',
-            reverse('admin:problems_problem_changelist') + '?_to_field=id&_popup=1'
-        )
-    get_problem_link_helper.short_description = 'Link to Problem'
-    get_problem_link_helper.allow_tags = True
 
 class DeckTagFilterInline(admin.TabularInline):
     form = DeckTagFilterForm
