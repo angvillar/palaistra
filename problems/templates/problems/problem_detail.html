@@ -1,5 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-    {% include 'problems/includes/problem_full.html' %}
+    {% if active_attempt %}
+        <div class="alert alert-info text-center mt-4" role="alert">
+            An attempt is in progress.
+        </div>
+    {% endif %}
+    <div class="card my-4 border-0">
+        <div class="card-body">
+            {% if active_attempt %}
+                {% include 'problems/includes/problem_full.html' with object=problem %}
+            {% else %}
+                {% include 'problems/includes/problem_display.html' with object=problem %}
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a href="{% url 'problems:problem-list' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Problems
+                    </a>
+                    <div class="d-flex gap-2 align-items-center">
+                        {% if not active_attempt %}
+                            <form method="post" class="mb-0">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-primary" type="submit" name="start_attempt">
+                                    Start Attempt
+                                </button>
+                            </form>
+                        {% elif active_attempt %}
+                            <form method="post" class="mb-0">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-success" type="submit" name="finish_attempt">
+                                    Finish Attempt
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
 {% endblock %}
 

@@ -5,8 +5,12 @@
 
 <ul class="list-group list-group-flush">
     {% for problem in object_list %}
-        <li class="list-group-item">
+        <li class="list-group-item mb-5">
            {% include 'problems/includes/problem_display.html' with object=problem %}
+               
+            <a href="{% url 'problems:problem-detail' pk=problem.id %}">
+                Go to Problem
+            </a>
         </li>
     {% empty %}
         <li>No problems yet.</li>

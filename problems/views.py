@@ -5,8 +5,29 @@ from django.utils import timezone
 from django.views.generic import DetailView, ListView
 from .models import Attempt, Deck, Problem
 
-class ProblemDetailView(DetailView):
-    model = Problem
+def problem_detail(request, pk):
+    problem = get_object_or_404(Problem, pk=pk)
+    active_attempt = Attempt.objects.filter(problem=problem, end_time__isnull=True).first()
+
+    if request.method == 'POST':
+        if 'start_attempt' in request.POST:
+            # Ensure no other attempt is active for this problem before creating a new one
+            if not active_attempt:
+                Attempt.objects.create(problem=problem)
+            # Redirect to the same page to show the new state (e.g., active attempt timer)
+            return redirect('problems:problem-detail', pk=problem.pk)
+        elif 'finish_attempt' in request.POST:
+            if active_attempt:
+                active_attempt.end_time = timezone.now()
+                active_attempt.time_taken = active_attempt.end_time - active_attempt.start_time
+                active_attempt.save()
+                return redirect('problems:problem-detail', pk=problem.pk)
+
+    context = {
+        'problem': problem,
+        'active_attempt': active_attempt,
+    }
+    return render(request, 'problems/problem_detail.html', context)
 
 class ProblemListView(ListView):
     model = Problem

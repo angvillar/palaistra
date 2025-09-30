@@ -8,7 +8,7 @@ urlpatterns = [
     # ex: /problems/
     path("problems/", views.ProblemListView.as_view(), name="problem-list"),
     # ex: /problems/5/
-    path("problems/<int:pk>/", views.ProblemDetailView.as_view(), name="problem-detail"),
+    path("problems/<int:pk>/", views.problem_detail, name="problem-detail"),
 
     # decks
     # ex: /decks/
