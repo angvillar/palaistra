@@ -20,6 +20,23 @@ class DeckListView(ListView):
 class DeckDetailView(DetailView):
     model = Deck
 
+def _advance_practice_session(request, deck_id):
+    """
+    Helper function to advance the deck practice session to the next problem
+    or end the session if all problems have been seen.
+    """
+    problem_ids = request.session.get('shuffled_problems', [])
+    request.session['current_problem_index'] += 1
+
+    if request.session.get('current_problem_index', 0) < len(problem_ids):
+        return redirect('problems:deck-practice', deck_id=deck_id)
+    else:
+        # End of the deck, clean up session and redirect
+        del request.session['shuffled_problems']
+        del request.session['current_problem_index']
+        del request.session['current_deck_id']
+        return redirect('problems:deck-detail', pk=deck_id)
+
 def deck_practice(request, deck_id):
     deck = get_object_or_404(Deck, pk=deck_id)
 
@@ -55,34 +72,14 @@ def deck_practice(request, deck_id):
                 active_attempt.end_time = timezone.now()
                 active_attempt.time_taken = active_attempt.end_time - active_attempt.start_time
                 active_attempt.save()
-            
-            # This logic will be handled by the 'skip' block below.
-            request.session['current_problem_index'] += 1
-
-            if request.session['current_problem_index'] < len(problem_ids):
-                return redirect('problems:deck-practice', deck_id=deck_id)
-            else:
-                del request.session['shuffled_problems']
-                del request.session['current_problem_index']
-                del request.session['current_deck_id']
-                return redirect('problems:deck-detail', pk=deck_id)
+            return _advance_practice_session(request, deck_id)
         
         # New block for the skip button
         elif 'skip_problem' in request.POST:
             # If an attempt is in progress, end it without saving
             if active_attempt:
                 active_attempt.delete() # Or set a flag to mark it as skipped
-            
-            # Increment the index to move to the next problem
-            request.session['current_problem_index'] += 1
-
-            if request.session['current_problem_index'] < len(problem_ids):
-                return redirect('problems:deck-practice', deck_id=deck_id)
-            else:
-                del request.session['shuffled_problems']
-                del request.session['current_problem_index']
-                del request.session['current_deck_id']
-                return redirect('problems:deck-detail', pk=deck_id)
+            return _advance_practice_session(request, deck_id)
 
     attempts_count = problem.attempts.count()
 
@@ -125,4 +122,3 @@ def tiptap_image_upload(request):
         {'error': 'Invalid request or no image file provided.'}, 
         status=400
     )
-
