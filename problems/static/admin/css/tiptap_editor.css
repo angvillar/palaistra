@@ -1,0 +1,49 @@
+.tiptap-container {
+    border: 1px solid #444; /* Darker border for the container */
+    border-radius: 4px;
+    background-color: #2d2d2d; /* Dark background for the whole container */
+}
+
+.tiptap-toolbar {
+    padding: 8px;
+    border-bottom: 1px solid #444; /* Darker border for the separator */
+    background-color: #252525; /* Slightly different dark shade for the toolbar */
+}
+
+.tiptap-button {
+    background: #4f4f4f; /* Dark grey button background */
+    color: #e0e0e0; /* Light text color */
+    border: 1px solid #666;
+    border-radius: 3px;
+    padding: 4px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s; /* Smooth transition for hover */
+}
+
+.tiptap-button:hover {
+    background-color: #666; /* Lighter grey for hover */
+}
+
+/* Style for when a button's format is active */
+.tiptap-button.is-active {
+    background-color: #007bff; /* A bright color to indicate active state */
+    color: #ffffff;
+    border-color: #007bff;
+}
+
+.tiptap-editor .ProseMirror {
+    min-height: 200px;
+    padding: 8px;
+    outline: none;
+    color: #e0e0e0; /* Light text color for the editor content */
+}
+
+.tiptap-editor .ProseMirror p {
+    margin: 0 0 1em 0;
+}
+
+.tiptap-editor .ProseMirror a {
+    color: #6c95eb; /* Make links visible in dark mode */
+}

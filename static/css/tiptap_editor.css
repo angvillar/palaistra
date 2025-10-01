@@ -1,0 +1,33 @@
+.tiptap-container {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.tiptap-toolbar {
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+    background-color: #f7f7f7;
+}
+
+.tiptap-button {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 4px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+}
+
+.tiptap-button:hover {
+    background-color: #eee;
+}
+
+.tiptap-editor .ProseMirror {
+    min-height: 200px;
+    padding: 8px;
+    outline: none;
+}
+
+.tiptap-editor .ProseMirror p {
+    margin: 0 0 1em 0;
+}

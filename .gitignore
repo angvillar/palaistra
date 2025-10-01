@@ -44,8 +44,10 @@ venv.bak/
 db.sqlite3
 # not ignore local prod db
 !prod_db.sqlite3
-media/
-static/
+# not ignore media
+!media/
+# not ignore static
+!static/
 
 # IDE files
 .vscode/
